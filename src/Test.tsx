@@ -62,7 +62,7 @@ export default class TitlebarBelowImageList extends React.Component {
     }
 
     componentDidMount() {
-        fetch("https://localhost:5001/order?id=34")
+        fetch("http://176.113.82.96/order?id=2")
             .then(res => res.json())
             .then(
                 (result) => {
