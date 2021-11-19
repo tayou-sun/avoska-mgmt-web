@@ -53,7 +53,7 @@ export default class TitlebarBelowImageList extends React.Component {
 
         var a =  localStorage.getItem('clicked') as any;
         var b =  JSON.parse(a) as any
-        return b.val ;
+        return b != null ? b.val : [] ;
     }
 
     setLS(data:any){
