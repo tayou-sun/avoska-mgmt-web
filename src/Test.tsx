@@ -187,7 +187,7 @@ export default class TitlebarBelowImageList extends React.Component {
 
 
                                             <div style={{display: 'flex', fontSize: 20, width: '100%' }} >
-                                                  <div style={{ fontWeight: 'bold', width:'70%', textAlign:'left' }}>{index+1}. {item.tag}</div>
+                                                  <div style={{ fontWeight: 'bold', width:'70%', textAlign:'left', textDecoration:'line-through' }}>{index+1}. {item.tag}</div>
                                                 <div style={{ paddingLeft: 5, color: 'lightgrey' }}>{this.getTagClickedCount(item.tag)} из {this.getTagCount(item.tag)} </div>
                                             </div>
                                             :
