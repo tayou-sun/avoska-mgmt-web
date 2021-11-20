@@ -6,6 +6,16 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from "react";
+import { Accordion, AccordionDetails, AccordionSummary, AppBar } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { setEmitFlags } from 'typescript';
+
+
+class Tag {
+    Name: string | undefined;
+    Count: number | undefined;
+    ClickedCount: number | undefined;
+}
 export default class TitlebarBelowImageList extends React.Component {
 
     /*   const [error, setError] = useState(null);
@@ -21,26 +31,40 @@ export default class TitlebarBelowImageList extends React.Component {
             clicked: this.getFromLS() != null ? this.getFromLS() : [],
             error: null,
             isLoaded: false,
+            count: 0,
+            tags: this.getFromTags() != null ? this.getFromTags() : []
         }
             ;
     }
 
-    a(d: string) {
-        
+    a(d: string, tag: string) {
+
         var aa = (this.state as any).clicked;
         aa.push(d);
 
-        this.setLS(JSON.stringify({val: aa}));
+        this.setLS(JSON.stringify({ val: aa }));
+
+        var a = (this.state as any).tags;
+        // a = a.map(function(item:any) { return item.name == tag ? item.clickedCount++ : item; });
+        a.forEach(function (item: any, i: any) { if (item.name == tag) a[i].clickedCount++; });
+
+        localStorage.setItem('tags', JSON.stringify(a));
+
         this.setState({
-            clicked: aa
+            clicked: aa,
         })
     }
-    outOfClicked(d: string){
+    outOfClicked(d: string, tag: string) {
 
         var aa = (this.state as any).clicked;
-        var filteredAry = aa.filter(function(e:any) { return e !== d })
+        var filteredAry = aa.filter(function (e: any) { return e !== d })
 
-        this.setLS(JSON.stringify({val: filteredAry}));
+
+        var a = (this.state as any).tags;
+        //a = a.map(function(item:any) { return item.name == tag ?  item.clickedCount  > 0 ? item.clickedCount-- : 0: item; });
+        a.forEach(function (item: any, i: any) { if (item.name == tag) a[i].clickedCount--; });
+
+        this.setLS(JSON.stringify({ val: filteredAry }));
 
         this.setState({
             clicked: filteredAry
@@ -49,26 +73,73 @@ export default class TitlebarBelowImageList extends React.Component {
     }
 
 
-    getFromLS(){
+    getFromTags() {
 
-        var a =  localStorage.getItem('clicked') as any;
-        var b =  JSON.parse(a) as any
-        return b != null ? b.val : [] ;
+        var a = localStorage.getItem('tags') as any;
+        var b = JSON.parse(a) as any
+        return b != null ? b : [];
     }
 
-    setLS(data:any){
-        
+
+    getFromLS() {
+
+        var a = localStorage.getItem('clicked') as any;
+        var b = JSON.parse(a) as any
+        return b != null ? b.val : [];
+    }
+
+    setLS(data: any) {
+
         localStorage.setItem('clicked', data);
     }
 
+    setTags(items: []) {
+        var res: any[] = []
+        items.forEach((x: any) => {
+            res.push({ name: x.tag, count: x.products.length, clickedCount: 0 });
+        })
+
+        return res;
+    }
+
+    isTgaClosed(tag: string) {
+
+        var a = ((this.state as any).tags as any);
+        var aa = a.filter((x: any) => x.name == tag);
+
+        return aa.length != 0 ? aa[0].count == aa[0].clickedCount : false;
+
+    }
+
+
+    getTagCount(tag: string) {
+
+        var a = ((this.state as any).tags as any);
+        var aa = a.filter((x: any) => x.name == tag);
+
+        return aa.length != 0 ? aa[0].count : 0;
+
+    }
+
+
+    getTagClickedCount(tag: string) {
+
+        var a = ((this.state as any).tags as any);
+        var aa = a.filter((x: any) => x.name == tag);
+
+        return aa.length != 0 ? aa[0].clickedCount : 0;
+
+    }
     componentDidMount() {
-        fetch("http://176.113.82.96/order?id=2")
+
+        fetch("https://msk.backend.avoska-dostavka.ru/order?id=2")
             .then(res => res.json())
             .then(
                 (result) => {
                     this.setState({
                         isLoaded: true,
-                      
+                        tags: this.getFromTags().length != 0 ? this.getFromTags() : this.setTags(result),
+                        count: result.map((x: any) => x.products).reduce(((sum: any, array: any) => sum + array.length), 0),
                         items: result
                     });
                 },
@@ -77,7 +148,7 @@ export default class TitlebarBelowImageList extends React.Component {
                 (error) => {
                     this.setState({
                         isLoaded: true,
-                      
+
                         error
                     });
                 }
@@ -85,149 +156,116 @@ export default class TitlebarBelowImageList extends React.Component {
     }
 
 
-    // Примечание: пустой массив зависимостей [] означает, что
-    // этот useEffect будет запущен один раз
-    // аналогично componentDidMount()
-    /*     useEffect(() => {
-          fetch("https://localhost:5001/order?id=34")
-            .then(res => res.json())
-            .then(
-              (result) => {
-              //  setIsLoaded(true);
-               // setItems(result);
-              },
-              // Примечание: важно обрабатывать ошибки именно здесь, а не в блоке catch(),
-              // чтобы не перехватывать исключения из ошибок в самих компонентах.
-              (error) => {
-                //setIsLoaded(true);
-               // setError(error);
-              }
-            )
-        }, []) */
-
 
     render() {
         var error = (this.state as any).error;
         var isLoaded = (this.state as any).isLoaded;
         var items = (this.state as any).items;
-        
+
         if (error) {
-          return <div>Ошибка: {error.message}</div>;
+            return <div>Ошибка: {error.message}</div>;
         } else if (!isLoaded) {
-          return <div>Загрузка...</div>;
+            return <div>Загрузка...</div>;
         } else {
-          return (
-            <div>
-            {(this.state as any).items?.map((item: any) => (
-                (this.state as any).clicked != null && (this.state as any).clicked?.includes(item.name) ?
-                <Card style={{ border: "1px solid grey", margin: 10}}>
-                    <CardMedia
-                        component="img"
-                        style={{opacity:0.4}}
-                        image={item.imageUrl}
-                        alt="green iguana"
-                    />
-                    <CardContent style={{background:"lightgrey", textDecoration:"line-through" }} >
-                        <Typography gutterBottom variant="h5" component="div">
-                            {item.name}
-                        </Typography>
+            return (
+                <div >
 
-                    </CardContent>
-                    <CardActions>
-                        <Button onClick={() => this.outOfClicked(item.name)} style={{ width: "100%", background: "grey", color: "black" }} size="small">Вернуть</Button>
+                    <AppBar position="fixed" color="primary" style={{ fontSize: 20, padding: 10 }} enableColorOnDark>Куплено {(this.state as any).clicked?.length} из {(this.state as any).count}</AppBar>
+                    {(this.state as any).items?.map((item: any, index:any) => (
+                        <div style={{ marginTop: 60 }}>
+                            {/*      <h1>{item.tag}</h1> */}
 
-                    </CardActions>
-                </Card> :  
-                
-                <Card style={{ border: "1px solid grey", margin: 10}}>
-                    <CardMedia
-                        component="img"
-                       
-                        image={item.imageUrl}
-                        alt="green iguana"
-                    />
-                    <CardContent>
-                        <Typography gutterBottom variant="h5" component="div">
-                            {item.name}
-                        </Typography>
 
-                    </CardContent>
-                    <CardActions>
-                        <Button onClick={() => this.a(item.name)} style={{ width: "100%", background: "grey", color: "black" }} size="small">Взял!</Button>
+                            <Accordion>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                    aria-controls="panel1a-content"
+                                    id="panel1a-header"
+                                >
+                                    {
+                                        this.isTgaClosed(item.tag) ?
 
-                    </CardActions>
-                </Card> 
 
-            ))}
+                                            <div style={{display: 'flex', fontSize: 20, width: '100%' }} >
+                                                  <div style={{ fontWeight: 'bold', width:'70%', textAlign:'left' }}>{index+1}. {item.tag}</div>
+                                                <div style={{ paddingLeft: 5, color: 'lightgrey' }}>{this.getTagClickedCount(item.tag)} из {this.getTagCount(item.tag)} </div>
+                                            </div>
+                                            :
+                                            <div style={{ display: 'flex', fontSize: 20,  width: '100%'  }} >
+                                                <div style={{ fontWeight: 'bold', width:'70%', textAlign:'left' }}>{index+1}. {item.tag}</div>
+                                                <div style={{ paddingLeft: 5, color: 'lightgrey' }}>{this.getTagClickedCount(item.tag)} из {this.getTagCount(item.tag)} </div>
+                                            </div>
 
-        </div>
-          );
+                                    }
+
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    {item.products.map((p: any) => (
+                                        (this.state as any).clicked != null && (this.state as any).clicked?.includes(p.name) ?
+                                            <Card style={{ border: "1px solid grey", margin: 10 }}>
+                                                <CardMedia
+                                                    component="img"
+                                                    style={{ opacity: 0.4 }}
+                                                    image={p.imageUrl}
+                                                    alt="green iguana"
+                                                />
+                                                <CardContent style={{ background: "lightgrey", textDecoration: "line-through" }} >
+                                                    <Typography gutterBottom variant="h5" component="div">
+                                                        {p.name}
+                                                    </Typography>
+                                                    <Typography variant="h6" color="text.secondary">
+                                                        Цена: {p.price}
+                                                    </Typography>
+
+                                                    <Typography variant="h6" color="text.secondary">
+                                                        Количество: {p.count}
+                                                    </Typography>
+                                                </CardContent>
+                                                <CardActions>
+                                                    <Button onClick={() => this.outOfClicked(p.name, item.tag)} style={{ width: "100%", background: "grey", color: "black" }} size="small">Вернуть</Button>
+
+                                                </CardActions>
+                                            </Card> :
+
+                                            <Card style={{ border: "1px solid grey", margin: 10 }}>
+                                                <CardMedia
+                                                    component="img"
+
+                                                    image={p.imageUrl}
+                                                    alt="green iguana"
+                                                />
+                                                <CardContent>
+                                                    <Typography gutterBottom variant="h5" component="div">
+                                                        {p.name}
+                                                    </Typography>
+                                                    <Typography variant="h6" color="text.secondary">
+                                                        Цена: {p.price}
+                                                    </Typography>
+
+                                                    <Typography variant="h6" color="text.secondary">
+                                                        Количество: {p.count}
+                                                    </Typography>
+                                                </CardContent>
+                                                <CardActions>
+                                                    <Button onClick={() => this.a(p.name, item.tag)} style={{ width: "100%", background: "grey", color: "black" }} size="small">Взял!</Button>
+
+                                                </CardActions>
+                                            </Card>
+
+                                    ))}
+
+                                </AccordionDetails>
+                            </Accordion>
+
+
+                        </div>
+                    ))}
+
+                </div>
+            );
         }
-      }
+    }
 
-       
-    
+
+
 }
-
-const itemData = [
-    {
-        img: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e',
-        title: 'Breakfast',
-        author: '@bkristastucchio',
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d',
-        title: 'Burger',
-        author: '@rollelflex_graphy726',
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45',
-        title: 'Camera',
-        author: '@helloimnik',
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c',
-        title: 'Coffee',
-        author: '@nolanissac',
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1533827432537-70133748f5c8',
-        title: 'Hats',
-        author: '@hjrc33',
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62',
-        title: 'Honey',
-        author: '@arwinneil',
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1516802273409-68526ee1bdd6',
-        title: 'Basketball',
-        author: '@tjdragotta',
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1518756131217-31eb79b20e8f',
-        title: 'Fern',
-        author: '@katie_wasserman',
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1597645587822-e99fa5d45d25',
-        title: 'Mushrooms',
-        author: '@silverdalex',
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1567306301408-9b74779a11af',
-        title: 'Tomato basil',
-        author: '@shelleypauls',
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1471357674240-e1a485acb3e1',
-        title: 'Sea star',
-        author: '@peterlaster',
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1589118949245-7d38baf380d6',
-        title: 'Bike',
-        author: '@southside_customs',
-    },
-];
