@@ -9,14 +9,14 @@ import { useEffect, useState } from "react";
 import { Accordion, AccordionDetails, AccordionSummary, AppBar } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { setEmitFlags } from 'typescript';
-
+import { debug } from 'console';
 
 class Tag {
     Name: string | undefined;
     Count: number | undefined;
     ClickedCount: number | undefined;
 }
-export default class TitlebarBelowImageList extends React.Component {
+export default class TitlebarBelowImageList extends React.Component<any> {
 
     /*   const [error, setError] = useState(null);
       const [isLoaded, setIsLoaded] = useState(false);
@@ -132,7 +132,10 @@ export default class TitlebarBelowImageList extends React.Component {
     }
     componentDidMount() {
 
-        fetch("https://msk.backend.avoska-dostavka.ru/order?id=2")
+        const queryParams = new URLSearchParams(window.location.search);
+        const id = queryParams.get('id');
+        //fetch("https://localhost:5001/order?id="+id)
+        fetch("https://msk.backend.avoska-dostavka.ru/order?id="+id)
             .then(res => res.json())
             .then(
                 (result) => {
@@ -171,7 +174,7 @@ export default class TitlebarBelowImageList extends React.Component {
                 <div >
 
                     <AppBar position="fixed" color="primary" style={{ fontSize: 20, padding: 10 }} enableColorOnDark>Куплено {(this.state as any).clicked?.length} из {(this.state as any).count}</AppBar>
-                    {(this.state as any).items?.map((item: any, index:any) => (
+                    {(this.state as any).items?.map((item: any, index: any) => (
                         <div style={{ marginTop: 60 }}>
                             {/*      <h1>{item.tag}</h1> */}
 
@@ -186,13 +189,13 @@ export default class TitlebarBelowImageList extends React.Component {
                                         this.isTgaClosed(item.tag) ?
 
 
-                                            <div style={{display: 'flex', fontSize: 20, width: '100%' }} >
-                                                  <div style={{ fontWeight: 'bold', width:'70%', textAlign:'left', textDecoration:'line-through' }}>{index+1}. {item.tag}</div>
+                                            <div style={{ display: 'flex', fontSize: 20, width: '100%' }} >
+                                                <div style={{ fontWeight: 'bold', width: '70%', textAlign: 'left', textDecoration: 'line-through' }}>{index + 1}. {item.tag}</div>
                                                 <div style={{ paddingLeft: 5, color: 'lightgrey' }}>{this.getTagClickedCount(item.tag)} из {this.getTagCount(item.tag)} </div>
                                             </div>
                                             :
-                                            <div style={{ display: 'flex', fontSize: 20,  width: '100%'  }} >
-                                                <div style={{ fontWeight: 'bold', width:'70%', textAlign:'left' }}>{index+1}. {item.tag}</div>
+                                            <div style={{ display: 'flex', fontSize: 20, width: '100%' }} >
+                                                <div style={{ fontWeight: 'bold', width: '70%', textAlign: 'left' }}>{index + 1}. {item.tag}</div>
                                                 <div style={{ paddingLeft: 5, color: 'lightgrey' }}>{this.getTagClickedCount(item.tag)} из {this.getTagCount(item.tag)} </div>
                                             </div>
 
