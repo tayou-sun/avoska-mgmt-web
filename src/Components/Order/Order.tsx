@@ -82,8 +82,8 @@ export default class Order extends React.Component<any> {
   componentDidMount() {
 
 
-    fetch("https://localhost:5001/result")
-      //fetch("https://msk.backend.avoska-dostavka.ru/result")
+    //fetch("https://localhost:5001/result")
+      fetch("https://msk.backend.avoska-dostavka.ru/result")
       .then(res => res.json())
       .then(
         (result) => {
