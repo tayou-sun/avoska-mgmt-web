@@ -134,8 +134,8 @@ export default class TitlebarBelowImageList extends React.Component<any> {
 
         const queryParams = new URLSearchParams(window.location.search);
         const id = queryParams.get('id');
-        //fetch("https://localhost:5001/order?id="+id)
-        fetch("https://msk.backend.avoska-dostavka.ru/order?id="+id)
+        fetch("https://localhost:5001/order?id="+id)
+       // fetch("https://msk.backend.avoska-dostavka.ru/order?id="+id)
             .then(res => res.json())
             .then(
                 (result) => {

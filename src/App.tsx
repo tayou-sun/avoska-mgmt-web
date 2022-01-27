@@ -6,6 +6,7 @@ import './App.css';
 import Test from './Test';
 import { render } from '@testing-library/react';
 import Order from './Components/Order/Order';
+import OrderCreate from './Components/Order/Create';
 
 
 
@@ -21,6 +22,7 @@ render() {
       <Routes>
     <Route path="/order" element={<Test  id={(this.props as any)} />}/>
     <Route path="/result" element={<Order />}/>
+    <Route path="/create" element={<OrderCreate />}/>
   </Routes>
   </div>
   );

@@ -24,6 +24,11 @@ import Remove from '@material-ui/icons/Remove';
 import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
+import { Box, Button, IconButton, Modal, Typography } from '@mui/material';
+import AddToPhotos from '@mui/icons-material/AddToPhotos';
+import { Link } from 'react-router-dom'
+import OrderCreate from './Create';
+import { padding } from '@mui/system';
 
 function createData(
   name: string,
@@ -34,6 +39,17 @@ function createData(
 ) {
   return { name, calories, fat, carbs, protein };
 }
+
+const style = {
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+};
 
 
 const tableIcons = {
@@ -67,13 +83,40 @@ const rows = [
 export default class Order extends React.Component<any> {
 
 
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      open: false
+    }
+        ;
+}
+
+
+  handleClose(){
+    this.setState({
+      open: false
+  })
+  }
+
+
+  handleOpen(){
+    this.setState({
+      open: true
+  })
+  }
+
+  routeChange() {
+    let path = `newPath`;
+    (this.props as any).history.push(path);
+  }
+
   getAllSum(items: any) {
 
     var res = 0;
 
     if (items != null) {
       for (var i = 0; i < items.length; i++) {
-        res += items[i].realPrice - Math.round(items[i].realPrice / 1.1)
+        res += items[i].price - Math.round(items[i].realPrice )
       }
     }
     return res;
@@ -115,17 +158,33 @@ export default class Order extends React.Component<any> {
 
 
   render() {
-    return (<div style={{ maxWidth: '100%' }}>
+    return (<div style={{ maxWidth: '100%', height:'100%' }}>
       { (this.state as any)?.items != null ?
 
 
-<div>
+<div  style={{height:'100%'}}>
 
-   
+
+<div style={{display:'flex', justifyContent:'center',alignItems:'center'}}>   
 <div style={{paddingTop:15, paddingBottom:15, fontWeight: 'bold', textAlign:'center', color:'green' }}>Общий доход: {this.getAllSum((this.state as any).items)}</div>
 
+<div style={{paddingLeft:10}}>
+
+
+<IconButton color="primary" aria-label="upload picture" component="span"  onClick={this.handleOpen.bind(this)}>
+    <AddToPhotos />
+  </IconButton>
+
+     
+{/* <IconButton style={{color:'white'}} aria-label="add an alarm" onClick={this.handleOpen.bind(this)} >
+  <AlarmIcon />
+</IconButton>
+ */}
+</div>
+</div>
 
       <MaterialTable
+     
       options={{
         filtering: true,
         grouping: true,
@@ -176,22 +235,43 @@ export default class Order extends React.Component<any> {
           { title: 'реальная стоимость ', field: 'realPrice' },
           { title: 'доход', field: 'realPrice', render: row => <div>
 
-{(row as any).realPrice - Math.round((row as any).realPrice / 1.1) > 0
+{(row as any).price - Math.round((row as any).realPrice / 1.1) > 0
                            ?
-                           <div style={{ color: 'green' }}>{ Math.round((row as any).realPrice - Math.round((row as any).realPrice / 1.1))}</div>
+                           <div style={{ color: 'green' }}>{ Math.round((row as any).price - Math.round((row as any).realPrice ))}</div>
                            :
-                           <div style={{ color: 'red' }}>{ Math.round((row as any).realPrice - Math.round((row as any).realPrice / 1.1))}</div>
+                           <div style={{ color: 'red' }}>{ Math.round((row as any).price - Math.round((row as any).realPrice ))}</div>
                          }
           </div> },
-          { title: 'тип оплаты', field: 'payment',    render: row => <div>{this.getPayment(row.payment)}</div>}
+          { title: 'тип оплаты', field: 'payment',    render: row => <div>{this.getPayment(row.payment)}</div>}, 
+          { title: 'комментарий ', field: 'comment' },
         ]}
         data={(this.state as any).items}
         title="Заказы"
       />
 
+
+
+
       </div>
       :<div>Загрузка...</div>
   }
+
+
+
+<Modal
+  open={(this.state as any).open}
+  onClose={this.handleClose.bind(this)}
+  aria-labelledby="modal-modal-title"
+  aria-describedby="modal-modal-description"
+>
+  <Box sx={style}>
+    <div style={{width:'100%'}}>
+    <OrderCreate handleClose={this.handleClose.bind(this)}/>
+    </div>
+  </Box>
+</Modal>
+
+
     </div>)
   }
   /*  render() {
